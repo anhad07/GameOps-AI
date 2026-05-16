@@ -1,27 +1,68 @@
 import Sidebar from "../components/Sidebar"
 
 import {
+  Brain,
+  AlertTriangle,
+  ShieldCheck,
+  Activity,
+  Cpu,
+  ServerCrash
+} from "lucide-react"
+
+import {
   useEffect,
   useState
 } from "react"
 
 function AIInsights() {
 
-  const [insights, setInsights] = useState([])
+  const [servers, setServers] = useState([])
 
   useEffect(() => {
 
-    fetch("http://127.0.0.1:5000/ai-insights")
+    const fetchServers = () => {
 
-      .then((res) => res.json())
+      fetch("http://127.0.0.1:5000/servers")
 
-      .then((data) => {
+        .then((res) => res.json())
 
-        setInsights(data)
+        .then((data) => {
 
-      })
+          setServers(data || [])
+        })
+    }
+
+    fetchServers()
+
+    const interval = setInterval(() => {
+
+      fetchServers()
+
+    }, 3000)
+
+    return () => clearInterval(interval)
 
   }, [])
+
+  const highCPU = servers.filter(
+
+    (server) =>
+      Number(server.cpu?.replace("%", "")) > 80
+  )
+
+  const mediumCPU = servers.filter(
+
+    (server) => {
+
+      const cpu = Number(server.cpu?.replace("%", ""))
+
+      return cpu > 50 && cpu <= 80
+    }
+  )
+
+  const overloadedServers = highCPU.length
+
+  const stableServers = servers.length - overloadedServers
 
   return (
 
@@ -34,98 +75,264 @@ function AIInsights() {
         {/* Header */}
         <div className="mb-10">
 
-          <h1 className="text-4xl font-semibold mb-2">
+          <h1 className="text-4xl font-semibold mb-2 flex items-center gap-3">
+
+            <Brain className="text-green-400" />
+
             AI Infrastructure Insights
+
           </h1>
 
           <p className="text-gray-500">
-            Intelligent cloud optimization and infrastructure analysis
+            Real-time AI-powered infrastructure intelligence
           </p>
 
         </div>
 
-        {/* Top Stats */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        {/* Top Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
-            <p className="text-gray-500 mb-3">
-              Infrastructure Stability
+            <div className="flex items-center justify-between mb-4">
+
+              <Cpu className="text-red-400" />
+
+              <span className="text-red-400 text-sm">
+                Critical
+              </span>
+
+            </div>
+
+            <p className="text-gray-500 mb-2">
+              High CPU Servers
             </p>
 
             <h2 className="text-5xl font-semibold">
-              92%
+              {overloadedServers}
             </h2>
 
           </div>
 
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
-            <p className="text-gray-500 mb-3">
-              Optimization Score
+            <div className="flex items-center justify-between mb-4">
+
+              <ShieldCheck className="text-green-400" />
+
+              <span className="text-green-400 text-sm">
+                Stable
+              </span>
+
+            </div>
+
+            <p className="text-gray-500 mb-2">
+              Stable Servers
             </p>
 
             <h2 className="text-5xl font-semibold">
-              84%
+              {stableServers}
             </h2>
 
           </div>
 
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
-            <p className="text-gray-500 mb-3">
-              Deployment Risk
+            <div className="flex items-center justify-between mb-4">
+
+              <Activity className="text-blue-400" />
+
+              <span className="text-blue-400 text-sm">
+                Monitoring
+              </span>
+
+            </div>
+
+            <p className="text-gray-500 mb-2">
+              Medium Load
             </p>
 
             <h2 className="text-5xl font-semibold">
-              LOW
+              {mediumCPU.length}
+            </h2>
+
+          </div>
+
+          <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
+
+            <div className="flex items-center justify-between mb-4">
+
+              <Brain className="text-purple-400" />
+
+              <span className="text-purple-400 text-sm">
+                AI Active
+              </span>
+
+            </div>
+
+            <p className="text-gray-500 mb-2">
+              AI Recommendations
+            </p>
+
+            <h2 className="text-5xl font-semibold">
+              {servers.length}
             </h2>
 
           </div>
 
         </div>
 
-        {/* AI Cards */}
-        <div className="space-y-6">
+        {/* AI Recommendations */}
+        <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 mb-6">
 
-          {insights.map((item, index) => (
+          <div className="flex items-center gap-3 mb-6">
 
-            <div
-              key={index}
-              className="bg-[#111111] border border-white/10 rounded-2xl p-6"
-            >
+            <Brain className="text-green-400" />
 
-              <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold">
+              Live AI Recommendations
+            </h2>
 
-                <h2 className="text-2xl font-semibold">
-                  {item.title}
-                </h2>
+          </div>
 
-                <div className={`px-3 py-1 rounded-full text-sm ${
-                  item.status === "Critical"
+          <div className="space-y-4">
 
-                    ? "bg-red-500/20 text-red-400"
+            {highCPU.map((server, index) => (
 
-                    : item.status === "Recommended"
+              <div
+                key={index}
+                className="border border-red-500/20 bg-red-500/5 rounded-xl p-5"
+              >
 
-                    ? "bg-yellow-500/20 text-yellow-400"
+                <div className="flex items-center gap-3 mb-2">
 
-                    : "bg-green-500/20 text-green-400"
-                }`}>
+                  <AlertTriangle className="text-red-400" />
 
-                  {item.status}
+                  <p className="font-semibold text-red-400">
+                    Critical Load Detected
+                  </p>
 
                 </div>
 
+                <p className="text-gray-300">
+
+                  {server.name} in {server.region} is experiencing extremely high CPU usage ({server.cpu}).
+
+                </p>
+
+                <p className="text-gray-500 text-sm mt-2">
+
+                  AI Recommendation:
+                  Scale infrastructure immediately and enable auto balancing.
+
+                </p>
+
               </div>
 
-              <p className="text-gray-400 leading-7">
-                {item.description}
-              </p>
+            ))}
 
-            </div>
+            {mediumCPU.map((server, index) => (
 
-          ))}
+              <div
+                key={index}
+                className="border border-yellow-500/20 bg-yellow-500/5 rounded-xl p-5"
+              >
+
+                <div className="flex items-center gap-3 mb-2">
+
+                  <Activity className="text-yellow-400" />
+
+                  <p className="font-semibold text-yellow-400">
+                    Elevated Resource Usage
+                  </p>
+
+                </div>
+
+                <p className="text-gray-300">
+
+                  {server.name} currently operating at moderate load ({server.cpu} CPU).
+
+                </p>
+
+                <p className="text-gray-500 text-sm mt-2">
+
+                  AI Recommendation:
+                  Monitor player traffic and prepare backup scaling nodes.
+
+                </p>
+
+              </div>
+
+            ))}
+
+            {servers.length === 0 && (
+
+              <div className="border border-white/10 rounded-xl p-6 text-center">
+
+                <ServerCrash className="mx-auto mb-4 text-gray-500" size={40} />
+
+                <p className="text-gray-400">
+                  No infrastructure data available.
+                </p>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+        {/* AI System Status */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+          <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
+
+            <p className="text-gray-500 mb-3">
+              AI Threat Detection
+            </p>
+
+            <h2 className="text-4xl font-semibold text-green-400">
+              Active
+            </h2>
+
+            <p className="text-gray-500 mt-3 text-sm">
+              Monitoring infrastructure anomalies in real-time.
+            </p>
+
+          </div>
+
+          <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
+
+            <p className="text-gray-500 mb-3">
+              Auto Optimization
+            </p>
+
+            <h2 className="text-4xl font-semibold text-blue-400">
+              Enabled
+            </h2>
+
+            <p className="text-gray-500 mt-3 text-sm">
+              AI continuously optimizing server distribution.
+            </p>
+
+          </div>
+
+          <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
+
+            <p className="text-gray-500 mb-3">
+              AI Infrastructure Health
+            </p>
+
+            <h2 className="text-4xl font-semibold text-purple-400">
+              Stable
+            </h2>
+
+            <p className="text-gray-500 mt-3 text-sm">
+              All AI systems operating within optimal range.
+            </p>
+
+          </div>
 
         </div>
 

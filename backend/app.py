@@ -18,6 +18,8 @@ db = client["gameops"]
 
 servers_collection = db["servers"]
 
+activity_collection = db["activities"]
+
 
 @app.route("/")
 def home():
@@ -33,6 +35,17 @@ def create_server():
     data = request.json
 
     servers_collection.insert_one(data)
+
+    activity = {
+
+        "title": f'{data.get("name")} deployed',
+
+        "desc": f'AI assigned {data.get("mode")} optimization profile',
+
+        "time": "Now"
+    }
+
+    activity_collection.insert_one(activity)
 
     return {
 
@@ -67,6 +80,25 @@ def get_servers():
         })
 
     return servers
+
+
+@app.route("/activities")
+def get_activities():
+
+    activities = []
+
+    for activity in activity_collection.find().sort("_id", -1):
+
+        activities.append({
+
+            "title": activity.get("title"),
+
+            "desc": activity.get("desc"),
+
+            "time": activity.get("time")
+        })
+
+    return activities
 
 
 if __name__ == "__main__":

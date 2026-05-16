@@ -9,20 +9,152 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  CartesianGrid
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell
 } from "recharts"
 
-const data = [
-  { day: "Mon", players: 120, ping: 24 },
-  { day: "Tue", players: 210, ping: 22 },
-  { day: "Wed", players: 180, ping: 26 },
-  { day: "Thu", players: 260, ping: 21 },
-  { day: "Fri", players: 320, ping: 20 },
-  { day: "Sat", players: 410, ping: 19 },
-  { day: "Sun", players: 390, ping: 23 }
-]
+import {
+  useEffect,
+  useState
+} from "react"
 
 function Analytics() {
+
+  const [servers, setServers] = useState([])
+
+  useEffect(() => {
+
+    const fetchServers = () => {
+
+      fetch("http://127.0.0.1:5000/servers")
+
+        .then((res) => res.json())
+
+        .then((data) => {
+
+          setServers(data)
+        })
+    }
+
+    fetchServers()
+
+    const interval = setInterval(() => {
+
+      fetchServers()
+
+    }, 3000)
+
+    return () => clearInterval(interval)
+
+  }, [])
+
+  const playerData = servers.length
+
+    ? servers.map((server) => ({
+
+        day: server.name,
+
+        players: Number(server.maxPlayers || 0)
+      }))
+
+    : [
+
+        {
+
+          day: "Empty",
+
+          players: 0
+        }
+      ]
+
+  const cpuData = servers.length
+
+    ? servers.map((server) => ({
+
+        day: server.name,
+
+        ping: Number(server.cpu?.replace("%", "")) || 0
+      }))
+
+    : [
+
+        {
+
+          day: "Empty",
+
+          ping: 0
+        }
+      ]
+
+  const regionCounts = {}
+
+  servers.forEach((server) => {
+
+    regionCounts[server.region] =
+
+      (regionCounts[server.region] || 0) + 1
+  })
+
+  const regionData = Object.keys(regionCounts).length
+
+    ? Object.keys(regionCounts).map((region) => ({
+
+        name: region,
+
+        value: regionCounts[region]
+      }))
+
+    : [
+
+        {
+
+          name: "No Data",
+
+          value: 1
+        }
+      ]
+
+  const COLORS = [
+    "#22c55e",
+    "#3b82f6",
+    "#facc15",
+    "#ef4444",
+    "#a855f7"
+  ]
+
+  const totalPlayers = servers.reduce(
+
+    (acc, server) => acc + Number(server.maxPlayers || 0),
+
+    0
+  )
+
+  const averageCPU = servers.length
+
+    ? Math.floor(
+
+        servers.reduce(
+
+          (acc, server) =>
+            acc + Number(server.cpu?.replace("%", "") || 0),
+
+          0
+        ) / servers.length
+      )
+
+    : 0
+
+  const stability = averageCPU > 80
+
+    ? "74%"
+
+    : averageCPU > 60
+
+    ? "86%"
+
+    : "98%"
 
   return (
 
@@ -41,16 +173,16 @@ function Analytics() {
         </p>
 
         {/* Top Cards */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
             <p className="text-gray-500 mb-3">
-              Peak Players
+              Total Players
             </p>
 
             <h2 className="text-5xl font-semibold">
-              410
+              {totalPlayers}
             </h2>
 
           </div>
@@ -58,11 +190,11 @@ function Analytics() {
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
             <p className="text-gray-500 mb-3">
-              Avg Ping
+              Avg CPU Usage
             </p>
 
             <h2 className="text-5xl font-semibold">
-              21ms
+              {averageCPU}%
             </h2>
 
           </div>
@@ -74,7 +206,7 @@ function Analytics() {
             </p>
 
             <h2 className="text-5xl font-semibold">
-              98%
+              {stability}
             </h2>
 
           </div>
@@ -82,18 +214,18 @@ function Analytics() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
           {/* Players Chart */}
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
             <h3 className="text-2xl font-semibold mb-6">
-              Weekly Active Players
+              Live Player Capacity
             </h3>
 
             <ResponsiveContainer width="100%" height={300}>
 
-              <LineChart data={data}>
+              <LineChart data={playerData}>
 
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -135,16 +267,16 @@ function Analytics() {
 
           </div>
 
-          {/* Ping Chart */}
+          {/* CPU Chart */}
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
             <h3 className="text-2xl font-semibold mb-6">
-              Server Ping Analytics
+              CPU Usage Analytics
             </h3>
 
             <ResponsiveContainer width="100%" height={300}>
 
-              <BarChart data={data}>
+              <BarChart data={cpuData}>
 
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -180,6 +312,44 @@ function Analytics() {
             </ResponsiveContainer>
 
           </div>
+
+        </div>
+
+        {/* Region Distribution */}
+        <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 mt-6">
+
+          <h3 className="text-2xl font-semibold mb-6">
+            Region Distribution
+          </h3>
+
+          <ResponsiveContainer width="100%" height={300}>
+
+            <PieChart>
+
+              <Pie
+                data={regionData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={90}
+                label
+              >
+
+                {regionData.map((entry, index) => (
+
+                  <Cell
+                    key={index}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+
+                ))}
+
+              </Pie>
+
+              <Tooltip />
+
+            </PieChart>
+
+          </ResponsiveContainer>
 
         </div>
 

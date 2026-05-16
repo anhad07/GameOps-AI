@@ -7,9 +7,47 @@ import {
 
 function Servers() {
 
-  const [servers, setServers] = useState([])
+  const [servers, setServers] = useState([
+
+    {
+
+      name: "COD #1",
+
+      region: "India",
+
+      status: "Online",
+
+      cpu: "95%",
+
+      ram: "90%",
+
+      maxPlayers: "500",
+
+      mode: "Performance"
+    },
+
+    {
+
+      name: "PUBG",
+
+      region: "Singapore",
+
+      status: "Online",
+
+      cpu: "60%",
+
+      ram: "55%",
+
+      maxPlayers: "300",
+
+      mode: "Balanced"
+    }
+
+  ])
 
   const [showPopup, setShowPopup] = useState(false)
+
+  const [loading, setLoading] = useState(false)
 
   const [formData, setFormData] = useState({
 
@@ -27,14 +65,29 @@ function Servers() {
 
       .then((data) => {
 
-        setServers(data)
+        if (data.length > 0) {
 
+          setServers(data)
+        }
+      })
+
+      .catch((err) => {
+
+        console.log(err)
       })
   }
 
   useEffect(() => {
 
     fetchServers()
+
+    const interval = setInterval(() => {
+
+      fetchServers()
+
+    }, 3000)
+
+    return () => clearInterval(interval)
 
   }, [])
 
@@ -49,6 +102,19 @@ function Servers() {
   }
 
   const createServer = async () => {
+
+    if (
+      !formData.name ||
+      !formData.region ||
+      !formData.maxPlayers
+    ) {
+
+      alert("Please fill all fields")
+
+      return
+    }
+
+    setLoading(true)
 
     let cpu = "15%"
 
@@ -148,35 +214,45 @@ function Servers() {
       ram
     }
 
-    await fetch("http://127.0.0.1:5000/create-server", {
+    try {
 
-      method: "POST",
+      await fetch("http://127.0.0.1:5000/create-server", {
 
-      headers: {
+        method: "POST",
 
-        "Content-Type": "application/json"
-      },
+        headers: {
 
-      body: JSON.stringify(serverData)
-    })
+          "Content-Type": "application/json"
+        },
 
-    fetchServers()
+        body: JSON.stringify(serverData)
+      })
 
-    setShowPopup(true)
+      fetchServers()
 
-    setTimeout(() => {
+      setShowPopup(true)
 
-      setShowPopup(false)
+      setTimeout(() => {
 
-    }, 2500)
+        setShowPopup(false)
 
-    setFormData({
+      }, 2500)
 
-      name: "",
-      region: "",
-      maxPlayers: "",
-      mode: "Normal"
-    })
+      setFormData({
+
+        name: "",
+        region: "",
+        maxPlayers: "",
+        mode: "Normal"
+      })
+    }
+
+    catch (error) {
+
+      console.log(error)
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -212,7 +288,7 @@ function Servers() {
             Deploy New Game Server
           </h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <input
               type="text"
@@ -260,9 +336,12 @@ function Servers() {
 
           <button
             onClick={createServer}
-            className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-medium hover:opacity-80 transition"
+            disabled={loading}
+            className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-medium hover:opacity-80 transition disabled:opacity-50"
           >
-            Deploy Server
+
+            {loading ? "Deploying..." : "Deploy Server"}
+
           </button>
 
         </div>
@@ -274,12 +353,12 @@ function Servers() {
 
             <div
               key={index}
-              className="bg-[#111111] border border-white/10 rounded-2xl p-6"
+              className="bg-[#111111] border border-white/10 rounded-2xl p-6 overflow-hidden"
             >
 
               <div className="flex items-center justify-between mb-6">
 
-                <div className="pr-4">
+                <div className="pr-4 max-w-[70%]">
 
                   <h2 className="text-2xl font-semibold break-words">
                     {server.name}
@@ -351,7 +430,7 @@ function Servers() {
 
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                   <div className="bg-black/40 border border-white/5 rounded-xl p-4">
 
@@ -371,7 +450,7 @@ function Servers() {
                       Mode
                     </p>
 
-                    <h3 className="text-lg font-semibold break-words">
+                    <h3 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
                       {server.mode || "Normal"}
                     </h3>
 

@@ -1,18 +1,45 @@
-import { Link } from "react-router-dom"
-import Sidebar from "./components/Sidebar"
+import {
+  BrowserRouter,
+  Routes,
+  Route
+} from "react-router-dom"
+
 import Dashboard from "./pages/Dashboard"
+import Servers from "./pages/Servers"
+import Analytics from "./pages/Analytics"
+import AIInsights from "./pages/AIInsights"
 
 function App() {
 
   return (
 
-    <div className="min-h-screen bg-black text-white flex">
+    <BrowserRouter>
 
-      <Sidebar />
+      <Routes>
 
-      <Dashboard />
+        <Route
+          path="/"
+          element={<Dashboard />}
+        />
 
-    </div>
+        <Route
+          path="/servers"
+          element={<Servers />}
+        />
+
+        <Route
+          path="/analytics"
+          element={<Analytics />}
+        />
+
+        <Route
+          path="/ai-insights"
+          element={<AIInsights />}
+        />
+
+      </Routes>
+
+    </BrowserRouter>
 
   )
 }
