@@ -1,14 +1,17 @@
 from flask import Flask, request
 from flask_cors import CORS
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
 CORS(app)
 
-
 client = MongoClient(
-    "mongodb+srv://anhadparihar07_db_user:anhadparihar07mongodb@gameopscluster.jmqhjpj.mongodb.net/?appName=GameOpsCluster"
+    os.getenv("MONGO_URI")
 )
 
 db = client["gameops"]
@@ -35,6 +38,7 @@ def create_server():
 
         "message": "Server created successfully"
     }
+
 
 @app.route("/servers")
 def get_servers():
@@ -63,6 +67,7 @@ def get_servers():
         })
 
     return servers
+
 
 if __name__ == "__main__":
 
