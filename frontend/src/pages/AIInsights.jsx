@@ -22,14 +22,20 @@ function AIInsights() {
 
     const fetchServers = () => {
 
-      fetch("http://
-http://13.60.85.120/servers")
+      fetch("http://13.60.85.120/servers")
 
         .then((res) => res.json())
 
         .then((data) => {
 
           setServers(data || [])
+
+        })
+
+        .catch((error) => {
+
+          console.log(error)
+
         })
     }
 

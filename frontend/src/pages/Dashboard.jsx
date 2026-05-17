@@ -24,8 +24,7 @@ function Dashboard() {
 
     const fetchData = () => {
 
-      fetch("http://
-http://13.60.85.120/servers")
+      fetch("http://13.60.85.120/servers")
 
         .then((res) => res.json())
 
@@ -34,14 +33,23 @@ http://13.60.85.120/servers")
           setServers(data)
         })
 
-      fetch("http://
-http://13.60.85.120/activities")
+        .catch((error) => {
+
+          console.log(error)
+        })
+
+      fetch("http://13.60.85.120/activities")
 
         .then((res) => res.json())
 
         .then((data) => {
 
           setActivities(data)
+        })
+
+        .catch((error) => {
+
+          console.log(error)
         })
     }
 

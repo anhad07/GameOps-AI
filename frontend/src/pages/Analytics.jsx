@@ -28,14 +28,20 @@ function Analytics() {
 
     const fetchServers = () => {
 
-      fetch("http://
-http://13.60.85.120/servers")
+      fetch("http://13.60.85.120/servers")
 
         .then((res) => res.json())
 
         .then((data) => {
 
           setServers(data)
+
+        })
+
+        .catch((error) => {
+
+          console.log(error)
+
         })
     }
 
@@ -173,7 +179,6 @@ http://13.60.85.120/servers")
           Real-time gaming infrastructure analytics
         </p>
 
-        {/* Top Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
@@ -214,10 +219,8 @@ http://13.60.85.120/servers")
 
         </div>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-          {/* Players Chart */}
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
             <h3 className="text-2xl font-semibold mb-6">
@@ -268,7 +271,6 @@ http://13.60.85.120/servers")
 
           </div>
 
-          {/* CPU Chart */}
           <div className="bg-[#111111] border border-white/10 rounded-2xl p-6">
 
             <h3 className="text-2xl font-semibold mb-6">
@@ -316,7 +318,6 @@ http://13.60.85.120/servers")
 
         </div>
 
-        {/* Region Distribution */}
         <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 mt-6">
 
           <h3 className="text-2xl font-semibold mb-6">
