@@ -74,8 +74,7 @@ function Signup() {
 
       const response = await fetch(
 
-        "http://
-http://13.60.85.120/signup",
+ "http://13.60.85.120/signup"
 
         {
 
