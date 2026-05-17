@@ -60,7 +60,7 @@ function Servers() {
   const fetchServers = () => {
 
     fetch("http://
-http://13.60.85.120:5000/servers")
+http://13.60.85.120/servers")
 
       .then((res) => res.json())
 
@@ -218,7 +218,7 @@ http://13.60.85.120:5000/servers")
     try {
 
       await fetch("http://
-http://13.60.85.120:5000/create-server", {
+http://13.60.85.120/create-server", {
 
         method: "POST",
 

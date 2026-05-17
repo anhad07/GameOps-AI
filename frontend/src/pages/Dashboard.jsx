@@ -25,7 +25,7 @@ function Dashboard() {
     const fetchData = () => {
 
       fetch("http://
-http://13.60.85.120:5000/servers")
+http://13.60.85.120/servers")
 
         .then((res) => res.json())
 
@@ -35,7 +35,7 @@ http://13.60.85.120:5000/servers")
         })
 
       fetch("http://
-http://13.60.85.120:5000/activities")
+http://13.60.85.120/activities")
 
         .then((res) => res.json())
 
