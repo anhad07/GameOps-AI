@@ -4,11 +4,17 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 
+import bcrypt
+import jwt
+import datetime
+
 load_dotenv()
 
 app = Flask(__name__)
 
 CORS(app)
+
+SECRET_KEY = "gameops_secret_key"
 
 client = MongoClient(
     os.getenv("MONGO_URI")
@@ -20,6 +26,8 @@ servers_collection = db["servers"]
 
 activity_collection = db["activities"]
 
+users_collection = db["users"]
+
 
 @app.route("/")
 def home():
@@ -28,6 +36,118 @@ def home():
         "message": "GameOps AI Backend Running"
     }
 
+
+# =========================
+# SIGNUP
+# =========================
+
+@app.route("/signup", methods=["POST"])
+def signup():
+
+    data = request.json
+
+    username = data.get("username")
+
+    email = data.get("email")
+
+    password = data.get("password")
+
+    existing_user = users_collection.find_one({
+
+        "email": email
+    })
+
+    if existing_user:
+
+        return {
+
+            "message": "User already exists"
+        }, 400
+
+    hashed_password = bcrypt.hashpw(
+
+        password.encode("utf-8"),
+
+        bcrypt.gensalt()
+    )
+
+    users_collection.insert_one({
+
+        "username": username,
+
+        "email": email,
+
+        "password": hashed_password
+    })
+
+    return {
+
+        "message": "Signup successful"
+    }
+
+
+# =========================
+# LOGIN
+# =========================
+
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.json
+
+    email = data.get("email")
+
+    password = data.get("password")
+
+    user = users_collection.find_one({
+
+        "email": email
+    })
+
+    if not user:
+
+        return {
+
+            "message": "Invalid email"
+        }, 401
+
+    if not bcrypt.checkpw(
+
+        password.encode("utf-8"),
+
+        user["password"]
+    ):
+
+        return {
+
+            "message": "Invalid password"
+        }, 401
+
+    token = jwt.encode({
+
+        "email": email,
+
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1)
+
+    },
+
+    SECRET_KEY,
+
+    algorithm="HS256")
+
+    return {
+
+        "message": "Login successful",
+
+        "token": token,
+
+        "username": user["username"]
+    }
+
+
+# =========================
+# CREATE SERVER
+# =========================
 
 @app.route("/create-server", methods=["POST"])
 def create_server():
@@ -52,6 +172,10 @@ def create_server():
         "message": "Server created successfully"
     }
 
+
+# =========================
+# GET SERVERS
+# =========================
 
 @app.route("/servers")
 def get_servers():
@@ -81,6 +205,10 @@ def get_servers():
 
     return servers
 
+
+# =========================
+# ACTIVITIES
+# =========================
 
 @app.route("/activities")
 def get_activities():

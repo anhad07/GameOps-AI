@@ -234,8 +234,49 @@ function Dashboard() {
 
             </div>
 
-            <div className="w-11 h-11 rounded-full bg-white text-black flex items-center justify-center font-semibold">
-              A
+            {/* Profile Dropdown */}
+            <div className="relative group">
+
+              <div className="w-11 h-11 rounded-full bg-white text-black flex items-center justify-center font-semibold cursor-pointer">
+
+                {localStorage.getItem("username")?.charAt(0).toUpperCase()}
+
+              </div>
+
+              <div className="absolute right-0 top-14 w-48 bg-[#111111] border border-white/10 rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-2xl overflow-hidden">
+
+                <div className="px-4 py-4 border-b border-white/10">
+
+                  <p className="text-sm text-gray-400 mb-1">
+                    Signed in as
+                  </p>
+
+                  <p className="font-semibold truncate">
+
+                    {localStorage.getItem("username")}
+
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={() => {
+
+                    localStorage.removeItem("token")
+
+                    localStorage.removeItem("username")
+
+                    window.location.href = "/login"
+                  }}
+                  className="w-full text-left px-4 py-4 text-red-400 hover:bg-white/5 transition"
+                >
+
+                  Logout
+
+                </button>
+
+              </div>
+
             </div>
 
           </div>
