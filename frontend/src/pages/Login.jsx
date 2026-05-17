@@ -56,7 +56,8 @@ function Login() {
 
       const response = await fetch(
 
-        "http://127.0.0.1:5000/login",
+        "http://
+http://13.60.85.120:5000/login",
 
         {
 

@@ -22,7 +22,8 @@ function AIInsights() {
 
     const fetchServers = () => {
 
-      fetch("http://127.0.0.1:5000/servers")
+      fetch("http://
+http://13.60.85.120:5000/servers")
 
         .then((res) => res.json())
 
